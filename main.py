@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -47,11 +47,13 @@ app.register_blueprint(xss_bp, url_prefix='/api/xss')
 app.register_blueprint(lina_bp, url_prefix='/api/ask-lina')  # NEW: Register LINA chatbot
 app.register_blueprint(reports_bp, url_prefix='/api/reports')
 
+
 @app.route('/')
 def login_page():
     if session.get('logged_in'):
         return redirect(url_for('dashboard'))
     return render_template('index.html')
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -66,6 +68,7 @@ def login():
         error = "Invalid username or password"
         return render_template('index.html', error=error)
 
+
 @app.route('/dashboard')
 def dashboard():
     if not session.get('logged_in'):
@@ -73,10 +76,68 @@ def dashboard():
     username = session.get('username', 'Admin')
     return render_template('dashboard.html', username=username)
 
+
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login_page'))
+
+
+@app.route('/api/change-password', methods=['POST'])
+def change_password():
+    """Handle password change requests"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    username = session.get('username')
+    
+    # Validation
+    if not current_password or not new_password:
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+    
+    if len(new_password) < 6:
+        return jsonify({'success': False, 'error': 'Password must be at least 6 characters'}), 400
+    
+    # Verify current password (hardcoded for demo - replace with database check in production)
+    if username == 'admin' and current_password != 'password':
+        return jsonify({'success': False, 'error': 'Current password is incorrect'}), 403
+    
+    # In production, you would:
+    # 1. Hash the new password using bcrypt or similar
+    # 2. Update it in your database
+    # 3. Optionally force re-login
+    # For now, we'll just return success (since this is a demo with hardcoded credentials)
+    
+    return jsonify({'success': True, 'message': 'Password changed successfully'})
+
+
+@app.route('/api/change-username', methods=['POST'])
+def change_username():
+    """Handle username change requests"""
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.json
+    new_username = data.get('new_username', '').strip()
+    
+    # Validation
+    if not new_username:
+        return jsonify({'success': False, 'error': 'Username cannot be empty'}), 400
+    
+    if len(new_username) < 3:
+        return jsonify({'success': False, 'error': 'Username must be at least 3 characters'}), 400
+    
+    if len(new_username) > 50:
+        return jsonify({'success': False, 'error': 'Username must be less than 50 characters'}), 400
+    
+    # Update session
+    session['username'] = new_username
+    
+    return jsonify({'success': True, 'message': 'Username updated successfully', 'username': new_username})
+
 
 if __name__ == "__main__":
     print("=" * 50)
@@ -85,7 +146,7 @@ if __name__ == "__main__":
     
     # Check if Groq API key is set
     if os.getenv('GROQ_API_KEY'):
-        print("LINA_API_KEY found")
+        print("✓ LINA_API_KEY found")
     else:
         print("⚠️  WARNING: LINA_API_KEY not found in .env file")
         print("   LINA chatbot will not work without it!")

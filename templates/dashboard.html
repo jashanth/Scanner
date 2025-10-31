@@ -299,7 +299,6 @@
 </head>
 
 <body class="bg-gray-900 text-gray-200">
-
     <div class="main-container">
         <aside class="sidebar">
             <div class="flex items-center gap-2">
@@ -1085,14 +1084,61 @@
                  </div>`;
                     document.getElementById('profile-form').addEventListener('submit', (e) => {
                         e.preventDefault();
-                        showMessage('Success', 'Display name updated successfully!');
-                        addNotification("Attempted to update profile name.");
+                        const newUsername = document.getElementById('username').value.trim();
+                        if (newUsername) {
+                            currentUserName = newUsername;
+                            document.getElementById('welcome-user').textContent = `Welcome, ${newUsername}`;
+                            // Optional: Save to sessionStorage or send to backend
+                            sessionStorage.setItem('username', newUsername);
+                            showMessage('Success', 'Display name updated successfully!');
+                            addNotification(`Profile name changed to ${newUsername}.`);
+                        }
                     });
-                    document.getElementById('password-form').addEventListener('submit', (e) => {
+                    document.getElementById('password-form').addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        showMessage('Success', 'Password changed successfully!');
-                        addNotification("Attempted to change password.");
-                        document.getElementById('password-form').reset();
+                        const currentPassword = document.getElementById('current-password').value;
+                        const newPassword = document.getElementById('new-password').value;
+                        const confirmPassword = document.getElementById('confirm-password').value;
+
+                        if (!currentPassword || !newPassword || !confirmPassword) {
+                            showMessage('Error', 'Please fill in all password fields.');
+                            return;
+                        }
+
+                        if (newPassword !== confirmPassword) {
+                            showMessage('Error', 'New passwords do not match!');
+                            return;
+                        }
+
+                        if (newPassword.length < 6) {
+                            showMessage('Error', 'Password must be at least 6 characters long.');
+                            return;
+                        }
+
+                        // Send to backend API
+                        try {
+                            const response = await fetch('/api/change-password', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    current_password: currentPassword,
+                                    new_password: newPassword
+                                })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                showMessage('Success', 'Password changed successfully!');
+                                addNotification("Password updated successfully.");
+                                document.getElementById('password-form').reset();
+                            } else {
+                                showMessage('Error', data.error || 'Failed to change password.');
+                            }
+                        } catch (error) {
+                            showMessage('Error', 'Could not connect to server. Please try again.');
+                            console.error('Password change error:', error);
+                        }
                     });
                     document.getElementById('theme-toggle-button').addEventListener('click', () => {
                         document.body.classList.toggle('light-theme');
