@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LINA - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.light-theme {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        body.light-theme .sidebar {
+            background-color: #e2e8f0;
+            border-right-color: #cbd5e1;
+        }
+
+        body.light-theme .sidebar-button {
+            color: #475569;
+        }
+
+        body.light-theme .sidebar-button:hover,
+        body.light-theme .sidebar-button.active {
+            color: white;
+            background-color: #0ea5e9;
+        }
+
+        body.light-theme .header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .header h1 {
+            color: #0f172a;
+        }
+
+        body.light-theme .card {
+            background-color: #ffffff;
+            color: #334155;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-theme .card h3,
+        body.light-theme .card h2 {
+            color: #0f172a;
+        }
+
+        body.light-theme .card p {
+            color: #475569;
+        }
+
+        body.light-theme .grid-container .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 256px;
+            background-color: #1e293b;
+            padding: 1.5rem;
+            border-right: 2px solid #334155;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex-shrink: 0;
+            transition: background-color 0.3s, border-right 0.3s;
+        }
+
+        .sidebar-button {
+            width: 100%;
+            text-align: left;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: #94a3b8;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-button:hover,
+        .sidebar-button.active {
+            color: #e2e8f0;
+            background-color: #0ea5e9;
+        }
+
+        .sidebar-button svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            background-color: #1e293b;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out, background-color 0.3s, color 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background-color: #334155;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        body.light-theme .form-input {
+            background-color: #cbd5e1;
+            border-color: #94a3b8;
+            color: #1e293b;
+        }
+
+        #notification-panel {
+            z-index: 50;
+            border: 1px solid #334155;
+        }
+
+        .notification-item {
+            border-bottom: 1px solid #334155;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        body.light-theme #notification-panel {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        body.light-theme .notification-item {
+            border-color: #e2e8f0;
+        }
+
+        #notification-list {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        #notification-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #notification-list::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        #notification-list::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 4px;
+        }
+
+        body.light-theme #notification-list::-webkit-scrollbar-track {
+            background: #e2e8f0;
+        }
+
+        body.light-theme #notification-list::-webkit-scrollbar-thumb {
+            background-color: #94a3b8;
+        }
+
+        body.light-theme #targets-list-container .bg-slate-800,
+        body.light-theme #history-list-container .bg-slate-800 {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* additional styles used by embedded port UI (kept small) */
+        .btn {
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #0ea5e9;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0284c7;
+        }
+
+        .btn-primary:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: #475569;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #334155;
+        }
+
+        .results-area {
+            background-color: #152238;
+            border-radius: 1rem;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .results-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .results-area::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .results-area::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 4px;
+        }
+
+        .results-area::-webkit-scrollbar-thumb:hover {
+            background-color: #64748b;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .stat-badge.success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .stat-badge.info {
+            background-color: rgba(14, 165, 233, 0.1);
+            color: #0ea5e9;
+        }
+
+        body.light-theme .results-area {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        body.light-theme .stat-badge.success {
+            background-color: rgba(16, 185, 129, 0.15);
+        }
+
+        body.light-theme .stat-badge.info {
+            background-color: rgba(14, 165, 233, 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40"
+                    aria-label="Radar scanner shield" class="flex-shrink-0">
+                    <!-- Shield background -->
+                    <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="#071433" />
+                    <!-- shield glow outline -->
+                    <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="none" stroke="#0ea5e9"
+                        stroke-width="1.8" stroke-linejoin="round" opacity="0.95" />
+                    <!-- Radar rings -->
+                    <g transform="translate(32,30)" stroke="#60a5fa" stroke-width="1.2" fill="none">
+                        <circle r="10" opacity="0.18" />
+                        <circle r="6" opacity="0.28" />
+                        <circle r="2.5" opacity="0.45" />
+                    </g>
+                    <!-- Sweeping beam: a rotated gradient sector animated -->
+                    <defs>
+                        <linearGradient id="beamGrad" x1="0" x2="1">
+                            <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.45" />
+                            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02" />
+                        </linearGradient>
+                        <mask id="beamMask">
+                            <!-- full circle black -->
+                            <rect width="64" height="64" fill="white" />
+                            <!-- clear shield center so beam shows only inside shield -->
+                            <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="black" />
+                        </mask>
+                    </defs>
+                    <!-- beam (a wide triangle) placed over center -->
+                    <g transform="translate(0,0)" mask="url(#beamMask)">
+                        <g transform="translate(32,30)">
+                            <path d="M0 0 L28 -12 A28 28 0 0 1 28 12 Z" fill="url(#beamGrad)" opacity="0.9">
+                                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s"
+                                    repeatCount="indefinite" />
+                            </path>
+                        </g>
+                    </g>
+                    <!-- sweep hand (thin) with pulse at tip -->
+                    <g transform="translate(32,30)">
+                        <line x1="0" y1="0" x2="26" y2="-11" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round"
+                            opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s"
+                                repeatCount="indefinite" />
+                        </line>
+                        <circle cx="26" cy="-11" r="2.5" fill="#38bdf8">
+                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s"
+                                repeatCount="indefinite" />
+                            <animate attributeName="r" values="1.6;2.8;1.6" dur="3.2s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.9;0.6;0.9" dur="3.2s" repeatCount="indefinite" />
+                        </circle>
+                    </g>
+                </svg>
+                <h1 class="text-2xl font-bold">LINA</h1>
+            </div>
+            <nav class="flex flex-col gap-1" id="sidebar-nav">
+                <!-- MAIN -->
+                <div>
+                    <h2 class="px-4 mb-2 text-xs font-bold uppercase text-gray-500">Main</h2>
+                    <button class="sidebar-button active" data-path="dashboard-overview">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                        </svg>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="sidebar-button" data-path="targets">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m0 13.5v2.25m0-11.25l1.04 1.732a4.5 4.5 0 007.823 0l1.04-1.732M12 21.75l-1.04-1.732a4.5 4.5 0 00-7.823 0L3 19.5m0-11.25l1.04 1.732a4.5 4.5 0 007.823 0L12 6.75" />
+                        </svg>
+                        <span>Targets</span>
+                    </button>
+                </div>
+
+                <!-- TOOLS -->
+                <div class="mt-4">
+                    <h2 class="px-4 mb-2 text-xs font-bold uppercase text-gray-500">Tools</h2>
+                    <button class="sidebar-button" data-path="portscan">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.288 15.038a5.25 5.25 0 017.424 0M5.136 12.006a8.25 8.25 0 0113.728 0M2.002 8.995a11.25 11.25 0 0119.996 0" />
+                        </svg>
+                        <span>Port Scan</span>
+                    </button>
+                    <button class="sidebar-button" data-path="tech-detector">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V8.25a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 8.25v7.5a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        <span>Tech Detect</span>
+                    </button>
+                    <button class="sidebar-button" data-path="scan-history">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Scan History</span>
+                    </button>
+                </div>
+
+                <!-- GENERAL -->
+                <div class="mt-4">
+                    <h2 class="px-4 mb-2 text-xs font-bold uppercase text-gray-500">General</h2>
+                    <button class="sidebar-button" data-path="ask-lina">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                        </svg>
+                        <span>Ask LINA</span>
+                    </button>
+                    <button class="sidebar-button" data-path="reports">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12M3.75 3h16.5M3.75 3v4.5A2.25 2.25 0 006 9.75h4.5M3.75 14.25v-3.75h4.5a2.25 2.25 0 012.25 2.25v1.5" />
+                        </svg>
+                        <span>Reports</span>
+                    </button>
+                    <button class="sidebar-button" data-path="settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10.343 3.94c.09-.542.56-1.007 1.11-1.226.554-.22 1.198-.059 1.62.336.422.395.632.96.495 1.503-.137.543-.593 1.01-1.11 1.227-.554.218-1.198.058-1.62-.337-.422-.395-.632-.96-.495-1.503zM14.25 10.134c.422.395.632.96.495 1.503-.137.543-.593 1.01-1.11 1.227-.554.218-1.198.058-1.62-.337-.422-.395-.632-.96-.495-1.503.137-.543.593-1.01 1.11-1.226.554-.22 1.198-.059 1.62.336zM18.157 16.328c.422.395.632.96.495 1.503-.137.543-.593 1.01-1.11 1.227-.554.218-1.198.058-1.62-.337-.422-.395-.632-.96-.495-1.503.137-.543.593-1.01 1.11-1.226.554-.22 1.198-.059 1.62.336z" />
+                        </svg>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <header class="header flex items-center justify-between mb-8 pb-4 border-b-2 border-slate-700">
+                <h1 class="text-2xl font-semibold text-white" id="welcome-user">Welcome, {{ username }}</h1>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <button id="notification-bell"
+                            class="relative p-2 rounded-full hover:bg-slate-700 focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                                </path>
+                            </svg>
+                            <span id="notification-badge"
+                                class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full hidden"></span>
+                        </button>
+                        <div id="notification-panel"
+                            class="absolute right-0 mt-2 w-80 bg-slate-800 rounded-lg shadow-lg p-2 hidden">
+                            <div id="notification-list" class="flex flex-col gap-1"></div>
+                        </div>
+                    </div>
+                    <button id="logout-button"
+                        class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl transition-colors duration-200">Logout</button>
+                </div>
+            </header>
+            <div id="dynamic-content"></div>
+        </main>
+    </div>
+
+    <div id="message-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-sm">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-white"></h3>
+            <p id="modal-message" class="text-gray-300 mb-6"></p>
+            <button id="close-modal"
+                class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 rounded-xl">OK</button>
+        </div>
+    </div>
+    <div id="confirmation-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-sm">
+            <h3 id="confirm-title" class="text-xl font-bold mb-4 text-white">Confirm Logout</h3>
+            <p id="confirm-message" class="text-slate-300 mb-6">Are you sure you want to log out?</p>
+            <div class="flex gap-4 mt-6">
+                <button id="confirm-cancel-btn"
+                    class="w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 rounded-xl">Cancel</button>
+                <button id="confirm-action-btn"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-xl">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addNotification(message) {
+            let notifications = JSON.parse(sessionStorage.getItem('notifications')) || [];
+            notifications.unshift({ text: message, time: new Date().toLocaleTimeString(), read: false });
+            notifications = notifications.slice(0, 10);
+            sessionStorage.setItem('notifications', JSON.stringify(notifications));
+
+            // Update badge if exists
+            const badge = document.getElementById('notification-badge');
+            if (badge) {
+                const hasUnread = notifications.some(n => !n.read);
+                badge.classList.toggle('hidden', !hasUnread);
+            }
+        }
+
+        function showMessage(title, message) {
+            const modal = document.getElementById('message-modal');
+            if (!modal) {
+                alert(title + ': ' + message);
+                return;
+            }
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            modal.classList.remove('hidden');
+        }
+        async function renderReports() {
+            const container = document.getElementById('reports-list-container');
+            if (!container) return;
+
+            try {
+                const response = await fetch('/api/reports');
+                const reports = await response.json();
+
+                if (reports.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400">No reports generated yet. Click "Generate Report" to create your first report.</p>';
+                } else {
+                    container.innerHTML = reports.map(report => `
+                <div class="flex flex-wrap justify-between items-center bg-slate-800 p-4 rounded-lg gap-3">
+                    <div class="flex-grow">
+                        <div class="font-semibold text-sky-400 text-lg">${report.name}</div>
+                        <div class="text-gray-400 text-sm mt-1">
+                            ${report.date} • ${report.total_scans} scan(s)
+                        </div>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="exportReport('${report.id}')" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            Export PDF
+                        </button>
+                        <button onclick="deleteReport('${report.id}')" class="text-gray-400 hover:text-red-500 transition-colors p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+                }
+            } catch (error) {
+                container.innerHTML = '<p class="text-red-400">Error loading reports. Please check your connection.</p>';
+                console.error('Error loading reports:', error);
+            }
+        }
+
+        async function generateFullReport() {
+            const btn = document.getElementById('generate-new-report-btn');
+            if (!btn) return;
+
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `
+        <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Generating...
+    `;
+
+            try {
+                const scanHistory = JSON.parse(sessionStorage.getItem('scanHistory')) || [];
+                const response = await fetch('/api/reports/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        scans: scanHistory,
+                        name: `Security Scan Report - ${new Date().toLocaleString()}`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addNotification('Report generated successfully!');
+                    renderReports();
+                    showMessage('Success', 'Report has been generated successfully!');
+                } else {
+                    showMessage('Error', data.error || 'Failed to generate report.');
+                }
+            } catch (error) {
+                showMessage('Error', 'Failed to connect to server. Please try again.');
+                console.error('Error generating report:', error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        }
+
+        async function exportReport(reportId) {
+            try {
+                addNotification('Preparing report download...');
+                window.location.href = `/api/reports/export/${reportId}`;
+            } catch (error) {
+                showMessage('Error', 'Failed to export report.');
+                console.error('Error exporting report:', error);
+            }
+        }
+
+        async function deleteReport(reportId) {
+            if (!confirm('Are you sure you want to delete this report?')) return;
+
+            try {
+                const response = await fetch(`/api/reports/delete/${reportId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addNotification('Report deleted successfully.');
+                    renderReports();
+                } else {
+                    showMessage('Error', 'Failed to delete report.');
+                }
+            } catch (error) {
+                showMessage('Error', 'Failed to connect to server.');
+                console.error('Error deleting report:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dynamicContent = document.getElementById('dynamic-content');
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const logoutButton = document.getElementById('logout-button');
+
+            const notificationBell = document.getElementById('notification-bell');
+            const notificationPanel = document.getElementById('notification-panel');
+            const notificationList = document.getElementById('notification-list');
+            const notificationBadge = document.getElementById('notification-badge');
+            const confirmationModal = document.getElementById('confirmation-modal');
+
+            let currentUserName = '{{ username }}';
+            let notifications = JSON.parse(sessionStorage.getItem('notifications')) || [];
+            const SHARED_TARGETS_KEY = 'deltaAppTargets'; // Shared key across all modules
+            let userTargets = JSON.parse(localStorage.getItem(SHARED_TARGETS_KEY)) || [];
+            let scanHistory = JSON.parse(sessionStorage.getItem('scanHistory')) || [];
+
+            function markNotificationsAsRead() {
+                if (notifications.some(n => !n.read)) {
+                    notifications.forEach(n => n.read = true);
+                    sessionStorage.setItem('notifications', JSON.stringify(notifications));
+                    updateNotificationBadge();
+                }
+            }
+
+            function renderNotifications() {
+                notificationList.innerHTML = '';
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = '<p class="text-center text-gray-400 p-4">No new notifications.</p>';
+                    return;
+                }
+                notifications.forEach(notif => {
+                    const item = document.createElement('div');
+                    const unreadClass = !notif.read ? ' bg-sky-900/[.30]' : '';
+                    item.className = 'notification-item p-3 rounded-lg' + unreadClass;
+                    item.innerHTML = `<p class="font-semibold text-sm">${notif.text}</p><p class="text-xs text-gray-400">${notif.time}</p>`;
+                    notificationList.appendChild(item);
+                });
+            }
+
+            function updateNotificationBadge() {
+                const hasUnread = notifications.some(n => !n.read);
+                notificationBadge.classList.toggle('hidden', !hasUnread);
+            }
+
+            notificationBell.addEventListener('click', (event) => {
+                event.stopPropagation();
+                notificationPanel.classList.toggle('hidden');
+                if (!notificationPanel.classList.contains('hidden')) {
+                    renderNotifications();
+                    markNotificationsAsRead();
+                }
+            });
+
+            function showMessage(title, message) {
+                const modal = document.getElementById('message-modal');
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-message').textContent = message;
+                modal.classList.remove('hidden');
+            }
+
+            document.getElementById('close-modal').addEventListener('click', () => {
+                document.getElementById('message-modal').classList.add('hidden');
+            });
+
+            const generateHistoryHTML = () => `
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold">Scan History</h2>
+                <button id="clear-history-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition-colors">Clear History</button>
+            </div>
+            <div class="card"><div id="history-list-container" class="space-y-3"></div></div>`;
+
+            function renderHistory() {
+                const container = document.getElementById('history-list-container');
+                if (!container) return;
+                if (scanHistory.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400">No scans recorded yet. Start a scan from the dashboard.</p>';
+                } else {
+                    container.innerHTML = scanHistory.map(item => `
+                    <div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg">
+                        <span class="font-semibold text-sky-400">${item.tool}</span>
+                        <span class="text-gray-400 text-sm">${item.date}</span>
+                    </div>
+                `).join('');
+                }
+            }
+            const generateReportsHTML = () => `
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold">Scan Reports</h2>
+                <button id="generate-new-report-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    Generate Report from All Scans
+                </button>
+            </div>
+            <div class="card">
+                <h3 class="font-bold text-lg mb-4">Generated Reports</h3>
+                <div id="reports-list-container" class="space-y-3"></div>
+            </div>
+        `;
+
+
+            const generateTargetsHTML = () => `
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold">Manage Targets</h2>
+                <button id="delete-all-targets-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition-colors">Delete All</button>
+            </div>
+            <div class="card mb-6"><form id="add-target-form" class="flex flex-col sm:flex-row gap-4"><input type="url" id="target-url-input" class="form-input flex-grow" placeholder="https://example.com" required><button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-xl">Add Target</button></form></div>
+            <div class="card"><h3 class="font-bold text-lg mb-4">Saved URLs</h3><div id="targets-list-container" class="space-y-3"></div></div>`;
+
+            function renderTargets() {
+                const container = document.getElementById('targets-list-container');
+                if (!container) return;
+                if (userTargets.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400">No targets saved. Add a URL above to get started.</p>';
+                } else {
+                    container.innerHTML = userTargets.map((target, index) => `
+                    <div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg">
+                        <span class="font-mono text-sky-400 break-all">${target}</span>
+                        <button data-index="${index}" class="delete-target-btn text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 ml-4">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>`).join('');
+                }
+                document.querySelectorAll('.delete-target-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const indexToDelete = parseInt(e.currentTarget.dataset.index, 10);
+                        const urlToDelete = userTargets.splice(indexToDelete, 1);
+                        localStorage.setItem(SHARED_TARGETS_KEY, JSON.stringify(userTargets)); // Changed
+                        addNotification(`Deleted target: ${urlToDelete}`);
+                        renderTargets();
+                    });
+                });
+            }
+
+            const pages = {
+                'dashboard-overview': { title: 'Dashboard Overview', isDashboard: true },
+                'targets': { title: 'Targets', isTargetsPage: true },
+                'scan-history': { title: 'Scan History', isHistoryPage: true },
+                'ask-lina': {
+
+                    title: 'Ask LINA',
+                    content: `
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-slate-700">
+                        <div>
+                            <h2 class="text-3xl font-bold text-white">Ask LINA</h2>
+                            <p class="text-gray-400 mt-1">Your AI Security Assistant</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col h-[calc(100vh-250px)]">
+                        <!-- Chat Messages Container -->
+                        <div id="chat-messages" class="flex-1 overflow-y-auto mb-4 space-y-4 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
+                            <div class="text-center text-slate-400 py-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mx-auto mb-4 text-slate-600">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                                </svg>
+                                <p class="font-semibold mb-2">Hi! I'm LINA, your security assistant.</p>
+                                <p class="text-sm">Ask me anything about web security, vulnerabilities, or how to use this platform.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Input Area -->
+                        <div class="flex gap-3">
+                            <input 
+                                type="text" 
+                                id="chat-input" 
+                                placeholder="Type your message here..." 
+                                class="form-input flex-1"
+                                onkeypress="if(event.key === 'Enter') document.getElementById('send-btn').click()"
+                            >
+                            <button id="send-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-xl transition-colors duration-200 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                                </svg>
+                                Send
+                            </button>
+                        </div>
+                    </div>
+                    `
+                },
+                'reports': { title: 'Reports', isReportsPage: true },
+
+                'settings': { title: 'Settings', isSettings: true },
+                'port-scanner': { title: 'Port Scanner', description: 'Network port scanning tool for security analysis.' },
+
+                'portscan': {
+                    title: 'Port Scanner',
+                    content: `
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-slate-700">
+                        <div>
+                        <h2 class="text-3xl font-bold text-white">Port Scanner</h2>
+                        <p class="text-gray-400 mt-1">Scan target hosts for open TCP ports and service detection</p>
+                        </div>
+                        <button id="back-to-dashboard" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-xl transition-colors duration-200 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                        </svg>
+                        Back to Dashboard
+                        </button>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3 text-white">Scan Configuration</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="target" class="block text-sm font-semibold mb-1.5 text-slate-300">Target Host</label>
+                            <input type="text" id="target" placeholder="scanme.nmap.org or 192.168.1.1" class="form-input">
+                            <p class="text-xs text-slate-500 mt-1">Enter hostname or IP address</p>
+                        </div>
+                        
+                        <div>
+                            <label for="ports" class="block text-sm font-semibold mb-1.5 text-slate-300">Ports</label>
+                            <input type="text" id="ports" placeholder="22,80,443 or 20-25" class="form-input">
+                            <p class="text-xs text-slate-500 mt-1">Comma-separated or range (leave blank for common ports)</p>
+                        </div>
+
+                        <div>
+                            <label for="timeout" class="block text-sm font-semibold mb-1.5 text-slate-300">Timeout (seconds)</label>
+                            <input type="number" id="timeout" value="1" min="1" max="10" class="form-input">
+                            <p class="text-xs text-slate-500 mt-1">Connection timeout per port</p>
+                        </div>
+                        </div>
+
+                        <button id="scanBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        Start Scan
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-white">Scan Results</h3>
+                        <div id="results" class="bg-slate-800/50 border border-slate-700 rounded-lg p-6 min-h-[320px] max-h-[400px] overflow-y-auto">
+                        <div class="flex flex-col items-center justify-center" style="min-height: 280px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-slate-600 mb-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.136 12.006a8.25 8.25 0 0113.728 0M2.002 8.995a11.25 11.25 0 0119.996 0M10.5 19.5h3" />
+                            </svg>
+                            <p class="text-slate-500 text-center">Enter a target and click "Start Scan" to begin.</p>
+                            <p class="text-slate-600 text-xs mt-2">Results will appear here in real-time.</p>
+                        </div>
+                        </div>
+                    </div>
+                    `
+                },
+                'port-scanner': { title: 'Port Scanner', description: 'Network port scanning tool for security analysis.' },
+                'tech-detector': {
+                    title: 'Tech Detector',
+                    content: `
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-slate-700">
+                        <div>
+                        <h2 class="text-3xl font-bold text-white">Technology Detector</h2>
+                        <p class="text-gray-400 mt-1">Detect technologies, frameworks, and libraries used by any website</p>
+                        </div>
+                        <button id="back-to-dashboard-tech" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-xl transition-colors duration-200 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                        </svg>
+                        Back to Dashboard
+                        </button>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3 text-white">Scan Configuration</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="tech-url" class="block text-sm font-semibold mb-1.5 text-slate-300">Target Website</label>
+                            <input type="text" id="tech-url" placeholder="https://example.com" class="form-input">
+                            <p class="text-xs text-slate-500 mt-1">Enter full URL including https://</p>
+                        </div>
+                        
+                        <div>
+                            <label for="tech-target-select" class="block text-sm font-semibold mb-1.5 text-slate-300">Load Saved Target</label>
+                            <select id="tech-target-select" class="form-input">
+                            <option value="">-- Select a saved target --</option>
+                            </select>
+                            <p class="text-xs text-slate-500 mt-1">Quick access to previously scanned sites</p>
+                        </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                        <button id="techScanBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            Detect Technologies
+                        </button>
+                        <button id="saveTechTargetBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors duration-200 flex items-center gap-2" title="Save current target">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                            </svg>
+                            Save Target
+                        </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3 text-white">Detection Results</h3>
+                        <div id="tech-results" class="bg-slate-800/50 border border-slate-700 rounded-lg p-6 min-h-[320px] max-h-[400px] overflow-y-auto">
+                        <div class="flex flex-col items-center justify-center" style="min-height: 280px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-slate-600 mb-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            <p class="text-slate-500 text-center">Enter a website URL and click "Detect Technologies" to begin.</p>
+                            <p class="text-slate-600 text-xs mt-2">Results will display technologies, frameworks, and libraries detected.</p>
+                        </div>
+                        </div>
+                    </div>
+                    `
+                },
+            }
+            const dashboardCards = [
+                { path: 'xss', title: 'XSS Scanner', description: 'Detect reflected XSS vulnerabilities.' },
+                { path: 'sql-injection', title: 'SQL Injection', description: 'Test parameters for SQL injection flaws.' },
+                // { path: 'open-redirect', title: 'Open Redirect', description: 'Identify and verify open redirect issues.' },
+                { path: 'subdomain-finder', title: 'Subdomain Finder', description: 'Enumerate subdomains and hidden assets.' },
+                { path: 'assets-discovery', title: 'Asset Discovery', description: 'Map application endpoints and directories.' },
+                { path: 'passive', title: 'Passive Links', description: 'Find Older and Archived links.' },
+                // { path: 'lfi', title: 'Local File Inclusion', description: 'Exploiting Local File Inclusion to Access Server Files' },
+                { path: 'ssl', title: 'SSL & TLS', description: 'Find SSL and TLS issues & Information' },
+                // { path: 'ssti', title: 'SSTI', description: 'Execute Server Side Template Injection' },
+                // { path: 'crlf', title: 'CRLF Finder', description: 'Find Header Injection Attacks' },
+                { path: 'js', title: 'Link Finder', description: 'Crawl and find JS endpoints' },
+                { path: 'filefetcher', title: 'File Finder', description: 'Extract Sensitive Links with files' },
+            ];
+
+            function renderContent(path) {
+                const page = pages[path];
+                if (!page) { renderContent('dashboard-overview'); return; }
+
+
+
+                if (page.isDashboard) {
+                    const cardsHtml = dashboardCards.map(card => `<div class="card cursor-pointer" data-path="${card.path}"><h3 class="text-lg font-semibold mb-2 text-white">${card.title}</h3><p class="text-sm text-gray-400">${card.description}</p></div>`).join('');
+                    dynamicContent.innerHTML = `<h2 class="text-xl font-bold mb-6">Dashboard Overview</h2><div class="grid-container" id="dashboard-cards-container">${cardsHtml}</div>`;
+
+                    document.querySelectorAll('#dashboard-cards-container .card').forEach(card => {
+                        card.addEventListener('click', (e) => {
+                            const newPath = e.currentTarget.dataset.path;
+                            const cardTitle = e.currentTarget.querySelector('h3').textContent;
+
+                            // centralized external mapping (only routes that should redirect away)
+                            const externalMap = {
+                                'filefetcher': '/api/filefetcher',
+                                'xss': '/api/xss',
+                                'sql-injection': '/api/sqli',
+                                'open-redirect': '/api/open-redirect',
+                                'subdomain-finder': '/api/subdomains',
+                                'assets-discovery': '/api/assets-discovery',
+                                'passive': '/api/passive-links',
+                                'lfi': '/api/lfi',
+                                'ssl': '/api/tls-test',
+                                'ssl-scanner': '/api/tls-test',
+                                'ssti': '/api/ssti-test',
+                                'crlf': '/api/crlf',
+                                'js': '/api/js'
+                            };
+
+                            // Record history FIRST (for both external and internal)
+                            scanHistory.unshift({ tool: cardTitle, date: new Date().toLocaleString() });
+                            scanHistory = scanHistory.slice(0, 50);
+                            sessionStorage.setItem('scanHistory', JSON.stringify(scanHistory));
+                            addNotification(`Selected ${cardTitle} tool.`);
+
+                            // Then check if it's external and redirect
+                            if (externalMap[newPath]) {
+                                window.location.href = externalMap[newPath];
+                                return;
+                            }
+
+                            // For internal tools, continue rendering
+                            updateActiveSidebarButton(newPath);
+                            renderContent(newPath);
+                            scanHistory = scanHistory.slice(0, 50);
+                            sessionStorage.setItem('scanHistory', JSON.stringify(scanHistory));
+                            addNotification(`Selected ${cardTitle} tool.`);
+
+                            updateActiveSidebarButton(newPath);
+                            renderContent(newPath);
+                        });
+                    });
+
+                } else if (page.isTargetsPage) {
+                    dynamicContent.innerHTML = generateTargetsHTML();
+                    renderTargets();
+                    document.getElementById('add-target-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const urlInput = document.getElementById('target-url-input');
+                        const newUrl = urlInput.value.trim();
+                        if (newUrl) {
+                            if (!userTargets.includes(newUrl)) {
+                                userTargets.push(newUrl);
+                                localStorage.setItem(SHARED_TARGETS_KEY, JSON.stringify(userTargets)); // Changed
+                                addNotification(`Added new target: ${newUrl}`);
+                                urlInput.value = '';
+                                renderTargets();
+                            } else {
+                                showMessage('Duplicate', 'This URL is already in your targets list.');
+                            }
+                        }
+
+                    });
+                    document.getElementById('delete-all-targets-btn').addEventListener('click', () => {
+                        userTargets = [];
+                        localStorage.removeItem(SHARED_TARGETS_KEY); // Changed
+                        addNotification('All targets have been deleted.');
+                        renderTargets();
+                    });
+                } else if (page.isHistoryPage) {
+                    dynamicContent.innerHTML = generateHistoryHTML();
+                    renderHistory();
+                    document.getElementById('clear-history-btn').addEventListener('click', () => {
+                        scanHistory = [];
+                        sessionStorage.removeItem('scanHistory');
+                        addNotification('Scan history has been cleared.');
+                        renderHistory();
+                    });
+
+                } else if (page.isReportsPage) {
+                    dynamicContent.innerHTML = generateReportsHTML();
+                    renderReports();
+                    document.getElementById('generate-new-report-btn').addEventListener('click', () => {
+                        generateFullReport();
+                    });
+                }
+                else if (page.isSettings) {
+                    dynamicContent.innerHTML = `<div class="card">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Profile Settings</h3>
+                            <p class="text-sm text-gray-400 mb-4">This form is for demonstration purposes. Your display name will not be permanently changed.</p>
+                            <form id="profile-form" class="space-y-4">
+                                <div><label for="username" class="block text-sm font-medium">Update Display Name</label><input type="text" id="username" value="${currentUserName}" class="form-input mt-1 block"></div>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl">Save Changes</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Password Management</h3>
+                            <p class="text-sm text-gray-400 mb-4">This is a view-only form. The password cannot be changed from this interface.</p>
+                            <form id="password-form" class="space-y-4">
+                                <div><label for="current-password" class="block text-sm font-medium">Current Password</label><input type="password" id="current-password" class="form-input mt-1 block"></div>
+                                <div><label for="new-password" class="block text-sm font-medium">New Password</label><input type="password" id="new-password" class="form-input mt-1 block"></div>
+                                <div><label for="confirm-password" class="block text-sm font-medium">Confirm New Password</label><input type="password" id="confirm-password" class="form-input mt-1 block"></div>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl">Change Password</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4">Theme Settings</h3>
+                            <button id="theme-toggle-button" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-xl">Toggle Dark/Light Theme</button>
+                        </div>
+                    </div>
+                 </div>`;
+                    document.getElementById('profile-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        showMessage('Success', 'Display name updated successfully!');
+                        addNotification("Attempted to update profile name.");
+                    });
+                    document.getElementById('password-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        showMessage('Success', 'Password changed successfully!');
+                        addNotification("Attempted to change password.");
+                        document.getElementById('password-form').reset();
+                    });
+                    document.getElementById('theme-toggle-button').addEventListener('click', () => {
+                        document.body.classList.toggle('light-theme');
+                        sessionStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+                        addNotification("Theme settings changed.");
+                    });
+                } else {
+                    // default content injection
+                    if (page.content) {
+                        dynamicContent.innerHTML = page.content;
+                    } else {
+                        dynamicContent.innerHTML = `<div class="card"><h2 class="text-3xl font-bold text-white mb-4">${page.title}</h2><p class="text-gray-400 mb-6">${page.description || ''}</p>${page.prevention || ''}</div>`;
+                    }
+                    // Initialize Ask LINA chatbot
+                    if (path === 'ask-lina') {
+                        function escapeHtml(unsafe) {
+                            return String(unsafe).replace(/&/g, "&amp;")
+                                .replace(/</g, "&lt;")
+                                .replace(/>/g, "&gt;")
+                                .replace(/"/g, "&quot;")
+                                .replace(/'/g, "&#039;");
+                        }
+
+                        const chatMessages = document.getElementById('chat-messages');
+                        const chatInput = document.getElementById('chat-input');
+                        const sendBtn = document.getElementById('send-btn');
+
+                        sendBtn.addEventListener('click', async () => {
+                            const message = chatInput.value.trim();
+                            if (!message) return;
+
+                            // Add user message
+                            const userMsgDiv = document.createElement('div');
+                            userMsgDiv.className = 'flex justify-end';
+                            userMsgDiv.innerHTML = `
+            <div class="bg-blue-600 text-white rounded-lg px-4 py-2 max-w-[70%]">
+                ${escapeHtml(message)}
+            </div>
+        `;
+                            chatMessages.appendChild(userMsgDiv);
+                            chatInput.value = '';
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                            // Add loading indicator
+                            const loadingDiv = document.createElement('div');
+                            loadingDiv.className = 'flex justify-start';
+                            loadingDiv.id = 'loading-msg';
+                            loadingDiv.innerHTML = `
+            <div class="bg-slate-700 text-slate-300 rounded-lg px-4 py-2 max-w-[70%] flex items-center gap-2">
+                <div class="animate-spin w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full"></div>
+                LINA is thinking...
+            </div>
+        `;
+                            chatMessages.appendChild(loadingDiv);
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                            try {
+                                // TODO: Replace with your backend API endpoint
+                                const response = await fetch('/api/ask-lina', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ message })
+                                });
+                                const data = await response.json();
+                                // Remove loading
+                                document.getElementById('loading-msg').remove();
+
+                                // Add LINA response
+                                const linaMsgDiv = document.createElement('div');
+                                linaMsgDiv.className = 'flex justify-start';
+                                linaMsgDiv.innerHTML = `
+                <div class="bg-slate-700 text-slate-200 rounded-lg px-4 py-2 max-w-[70%]">
+                    ${escapeHtml(data.response || 'Sorry, I could not process that.')}
+                </div>
+            `;
+                                chatMessages.appendChild(linaMsgDiv);
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                            } catch (error) {
+                                document.getElementById('loading-msg').remove();
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'flex justify-start';
+                                errorDiv.innerHTML = `
+                <div class="bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg px-4 py-2 max-w-[70%]">
+                    Error connecting to LINA. Please try again.
+                </div>
+            `;
+                                chatMessages.appendChild(errorDiv);
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+                            }
+                        });
+                    }
+
+                    // If the rendered page is the embedded Port Scanner, attach its behavior:
+                    // If the rendered page is the embedded Tech Detector, attach its behavior:
+                    if (path === 'tech-detector') {
+                        function escapeHtml(unsafe) {
+                            return String(unsafe).replace(/&/g, "&amp;")
+                                .replace(/</g, "&lt;")
+                                .replace(/>/g, "&gt;")
+                                .replace(/"/g, "&quot;")
+                                .replace(/'/g, "&#039;");
+                        }
+
+                        const techUrlInput = document.getElementById("tech-url");
+                        const techScanBtn = document.getElementById("techScanBtn");
+                        const techResultsDiv = document.getElementById("tech-results");
+                        const saveTechTargetBtn = document.getElementById("saveTechTargetBtn");
+                        const techTargetSelect = document.getElementById("tech-target-select");
+                        const backBtn = document.getElementById("back-to-dashboard-tech");
+
+                        const TECH_STORAGE_KEY = "techDetectorTargets";
+
+                        function loadTechTargets() {
+                            const targets = JSON.parse(localStorage.getItem(TECH_STORAGE_KEY)) || [];
+                            techTargetSelect.innerHTML = `<option value="">-- Select a saved target --</option>`;
+                            targets.forEach(target => {
+                                const option = document.createElement("option");
+                                option.value = target;
+                                option.textContent = target;
+                                techTargetSelect.appendChild(option);
+                            });
+                        }
+
+                        function getCategoryColor(category) {
+                            const colors = {
+                                "web servers": "#16a34a",
+                                "cms": "#f59e0b",
+                                "blogs": "#f97316",
+                                "programming languages": "#6366f1",
+                                "databases": "#e11d48",
+                                "ui frameworks": "#0ea5e9",
+                                "javascript libraries": "#8b5cf6",
+                                "page builders": "#f43f5e",
+                                "font scripts": "#14b8a6",
+                                "seo": "#facc15"
+                            };
+                            return colors[category.toLowerCase()] || "#64748b";
+                        }
+
+                        if (backBtn) {
+                            backBtn.addEventListener('click', () => {
+                                renderContent('dashboard-overview');
+                                updateActiveSidebarButton('dashboard-overview');
+                            });
+                        }
+
+                        if (saveTechTargetBtn) {
+                            saveTechTargetBtn.addEventListener("click", () => {
+                                const urlToSave = techUrlInput.value.trim();
+                                if (!urlToSave) {
+                                    showMessage("Error", "Please enter a URL first.");
+                                    return;
+                                }
+                                let targets = JSON.parse(localStorage.getItem(TECH_STORAGE_KEY)) || [];
+                                if (!targets.includes(urlToSave)) {
+                                    targets.unshift(urlToSave);
+                                    localStorage.setItem(TECH_STORAGE_KEY, JSON.stringify(targets.slice(0, 50)));
+                                    loadTechTargets();
+                                    addNotification("Target saved successfully!");
+                                } else {
+                                    showMessage("Info", "This target is already saved.");
+                                }
+                            });
+                        }
+
+                        if (techTargetSelect) {
+                            techTargetSelect.addEventListener("change", () => {
+                                if (techTargetSelect.value) {
+                                    techUrlInput.value = techTargetSelect.value;
+                                }
+                            });
+                        }
+
+                        if (techScanBtn && techResultsDiv) {
+                            techScanBtn.addEventListener("click", async () => {
+                                const url = techUrlInput.value.trim();
+
+                                if (!url) {
+                                    techResultsDiv.innerHTML = `
+                    <div class="p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <div>
+                            <div class="font-semibold">Missing URL</div>
+                            <div class="text-sm">Please enter a valid website URL.</div>
+                        </div>
+                    </div>
+                `;
+                                    return;
+                                }
+
+                                techResultsDiv.innerHTML = `
+                <div class="flex items-center gap-3 p-4">
+                    <div class="animate-spin">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-sky-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-slate-200">Analyzing ${escapeHtml(url)}...</div>
+                        <div class="text-sm text-slate-400">Detecting technologies and frameworks.</div>
+                    </div>
+                </div>
+            `;
+
+                                techScanBtn.disabled = true;
+                                techScanBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 animate-spin">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Detecting...
+            `;
+
+                                try {
+                                    const res = await fetch("/api/tech-detect/", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ url }),
+                                    });
+
+                                    const data = await res.json();
+
+                                    if (data.error || !res.ok) {
+                                        techResultsDiv.innerHTML = `
+                        <div class="p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                            <div>
+                                <div class="font-semibold">Detection Error</div>
+                                <div class="text-sm">${escapeHtml(data.error || 'Failed to detect technologies')}</div>
+                            </div>
+                        </div>
+                    `;
+                                        return;
+                                    }
+
+                                    if (!data || Object.keys(data).length === 0) {
+                                        techResultsDiv.innerHTML = `
+                        <div class="p-4 text-center text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mx-auto mb-3 text-slate-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                            </svg>
+                            <div class="font-semibold mb-1">No Technologies Detected</div>
+                            <div class="text-sm">The website may be using custom solutions or blocking detection.</div>
+                        </div>
+                    `;
+                                        return;
+                                    }
+
+                                    let html = `
+                    <div class="mb-4 pb-4 border-b border-slate-700">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-sky-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div class="text-lg font-bold text-slate-200">Detection Complete</div>
+                        </div>
+                        <div class="text-sm text-slate-400">Found ${Object.keys(data).length} technologies</div>
+                    </div>
+                    <div class="space-y-3">
+                `;
+
+                                    Object.entries(data).forEach(([tech, info]) => {
+                                        html += `
+                        <div class="flex flex-wrap justify-between items-center p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700/70 transition-colors">
+                            <span class="text-sky-400 font-semibold">${escapeHtml(tech)}</span>
+                            <div class="flex gap-2 flex-wrap mt-2 sm:mt-0">
+                    `;
+
+                                        if (info.categories && info.categories.length > 0) {
+                                            info.categories.forEach(cat => {
+                                                const bgColor = getCategoryColor(cat);
+                                                html += `
+                                <span class="px-2 py-1 text-xs rounded-full font-semibold text-white" style="background-color: ${bgColor}">
+                                    ${escapeHtml(cat)}
+                                </span>
+                            `;
+                                            });
+                                        }
+
+                                        html += `
+                            </div>
+                        </div>
+                    `;
+                                    });
+
+                                    html += `</div>`;
+                                    techResultsDiv.innerHTML = html;
+                                    addNotification(`Detected ${Object.keys(data).length} technologies on ${url}`);
+
+                                } catch (err) {
+                                    techResultsDiv.innerHTML = `
+                    <div class="p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <div>
+                            <div class="font-semibold">Connection Error</div>
+                            <div class="text-sm">Could not connect to the detection API. Please check if the server is running.</div>
+                        </div>
+                    </div>
+                `;
+                                } finally {
+                                    techScanBtn.disabled = false;
+                                    techScanBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    Detect Technologies
+                `;
+                                }
+                            });
+                        }
+
+                        loadTechTargets();
+                    }
+                    if (path === 'portscan') {
+                        // helper escape (same as your port page)
+                        function escapeHtml(unsafe) {
+                            return String(unsafe).replace(/&/g, "&amp;")
+                                .replace(/</g, "&lt;")
+                                .replace(/>/g, "&gt;")
+                                .replace(/"/g, "&quot;")
+                                .replace(/'/g, "&#039;");
+                        }
+
+                        const scanBtn = document.getElementById("scanBtn");
+                        const resultsDiv = document.getElementById("results");
+                        const backBtn = document.getElementById("back-to-dashboard");
+
+                        if (backBtn) {
+                            backBtn.addEventListener('click', () => {
+                                renderContent('dashboard-overview');
+                                updateActiveSidebarButton('dashboard-overview');
+                            });
+                        }
+
+                        if (scanBtn && resultsDiv) {
+                            const newScanBtn = scanBtn.cloneNode(true);
+                            scanBtn.parentNode.replaceChild(newScanBtn, scanBtn);
+
+                            newScanBtn.addEventListener("click", async () => {
+                                const target = document.getElementById("target").value.trim();
+                                const ports = document.getElementById("ports").value.trim();
+                                const timeout = document.getElementById("timeout").value.trim();
+
+                                if (!target) {
+                                    resultsDiv.innerHTML = `
+        <div class="p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <div>
+            <div class="font-semibold">Missing Target</div>
+            <div class="text-sm">Please enter a valid hostname or IP address.</div>
+          </div>
+        </div>
+      `;
+                                    return;
+                                }
+
+                                resultsDiv.innerHTML = `
+      <div class="flex items-center gap-3 p-4">
+        <div class="animate-spin">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-sky-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+        </div>
+        <div>
+          <div class="font-semibold text-slate-200">Scanning ${escapeHtml(target)}...</div>
+          <div class="text-sm text-slate-400">Please wait while we probe the target.</div>
+        </div>
+      </div>
+    `;
+
+                                newScanBtn.disabled = true;
+                                newScanBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 animate-spin">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+      </svg>
+      Scanning...
+    `;
+
+                                try {
+                                    const res = await fetch("/api/port-scan/scan", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ target, ports, timeout }),
+                                    });
+
+                                    const data = await res.json();
+
+                                    if (data.error) {
+                                        resultsDiv.innerHTML = `
+          <div class="p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div>
+              <div class="font-semibold">Scan Error</div>
+              <div class="text-sm">${escapeHtml(data.error)}</div>
+            </div>
+          </div>
+        `;
+                                        return;
+                                    }
+
+                                    let html = `
+        <div class="mb-4 pb-4 border-b border-slate-700">
+          <div class="flex items-center gap-2 mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-sky-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="text-lg font-bold text-slate-200">Scan Complete</div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <div class="stat-badge info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+              </svg>
+              Target: <strong>${escapeHtml(data.target)}</strong>
+            </div>
+            <div class="stat-badge info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5" />
+              </svg>
+              IP: <strong>${escapeHtml(data.ip)}</strong>
+            </div>
+            <div class="stat-badge success">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Open: <strong>${data.open_ports}</strong> / ${data.ports_scanned}
+            </div>
+          </div>
+        </div>
+      `;
+
+                                    if (data.results && data.results.length > 0) {
+                                        html += `
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="border-b border-slate-600">
+                <th class="text-left p-2 text-xs font-bold uppercase text-slate-400">Port</th>
+                <th class="text-left p-2 text-xs font-bold uppercase text-slate-400">Status</th>
+                <th class="text-left p-2 text-xs font-bold uppercase text-slate-400">Service Banner</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+                                        data.results.forEach(r => {
+                                            const statusClass = r.status === 'open' ? 'text-green-400' : 'text-red-400';
+                                            html += `
+            <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+              <td class="p-2 font-mono font-semibold text-sm">${r.port}</td>
+              <td class="p-2 ${statusClass} font-semibold text-sm">${r.status.toUpperCase()}</td>
+              <td class="p-2 text-slate-400 font-mono text-xs">${escapeHtml(r.banner || "-")}</td>
+            </tr>
+          `;
+                                        });
+
+                                        html += `
+            </tbody>
+          </table>
+        `;
+                                    } else {
+                                        html += `<div class="text-slate-500 text-center py-8">No open ports found.</div>`;
+                                    }
+
+                                    resultsDiv.innerHTML = html;
+
+                                } catch (err) {
+                                    resultsDiv.innerHTML = `
+        <div class="p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-lg flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <div>
+            <div class="font-semibold">Connection Error</div>
+            <div class="text-sm">Could not connect to the backend scanner API. Please check if the server is running.</div>
+          </div>
+        </div>
+      `;
+                                } finally {
+                                    newScanBtn.disabled = false;
+                                    newScanBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        Start Scan
+      `;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            function updateActiveSidebarButton(path) {
+                document.querySelectorAll('.sidebar-button').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.querySelector(`[data-path="${path}"]`);
+                if (activeBtn) { activeBtn.classList.add('active'); }
+            }
+
+            document.addEventListener('click', (e) => {
+                if (!notificationPanel.classList.contains('hidden')) {
+                    if (!notificationBell.contains(e.target) && !notificationPanel.contains(e.target)) {
+                        notificationPanel.classList.add('hidden');
+                    }
+                }
+            });
+
+            sidebarNav.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button || button.id === 'learn-toggle') return;
+                const path = button.dataset.path;
+                const pageTitle = pages[path] ? pages[path].title : button.textContent.trim();
+                if (path && path !== 'learn-overview' && pages[path]) {
+                    addNotification(`Navigated to ${pageTitle}.`);
+                }
+                updateActiveSidebarButton(path);
+                renderContent(path);
+            });
+
+            logoutButton.addEventListener('click', () => {
+                confirmationModal.classList.remove('hidden');
+            });
+            document.getElementById('confirm-cancel-btn').addEventListener('click', () => {
+                confirmationModal.classList.add('hidden');
+            });
+            document.getElementById('confirm-action-btn').addEventListener('click', () => {
+                window.location.href = '/logout';
+            });
+
+            if (sessionStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+
+            if (!sessionStorage.getItem('welcomed')) {
+                addNotification(`Welcome back, ${currentUserName}!`);
+                sessionStorage.setItem('welcomed', 'true');
+            }
+
+            updateNotificationBadge();
+            renderContent('dashboard-overview');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delta - LFI Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .sidebar {
+            width: 80px;
+            background-color: #1e293b;
+            padding: 1.5rem 0;
+            border-right: 2px solid #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.5rem;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 2rem 3rem;
+        }
+
+        .card {
+            background-color: #1e293b;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-input,
+        .select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #334155;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn {
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: #0ea5e9;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0284c7;
+        }
+
+        .btn-secondary {
+            background-color: #475569;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #525f77;
+        }
+
+        .btn-danger {
+            background-color: #be123c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #9f1239;
+        }
+
+        .btn:disabled {
+            background-color: #475569;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .results-area {
+            background-color: #152238;
+            border-radius: 1rem;
+            min-height: 40vh;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .results-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .results-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .results-area::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 4px;
+        }
+
+        .progress-bar-bg {
+            background-color: #334155;
+        }
+
+        .progress-bar-fill {
+            background-color: #0ea5e9;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #0ea5e9;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateX(120%);
+            animation: slideIn 0.5s forwards, slideOut 0.5s 3.5s forwards;
+            z-index: 50;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(120%);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="/dashboard" title="Back to Dashboard">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40"
+                aria-label="Radar scanner shield" class="flex-shrink-0">
+                <!-- Shield background -->
+                <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="#071433" />
+                <!-- shield glow outline -->
+                <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="none" stroke="#0ea5e9"
+                    stroke-width="1.8" stroke-linejoin="round" opacity="0.95" />
+                <!-- Radar rings -->
+                <g transform="translate(32,30)" stroke="#60a5fa" stroke-width="1.2" fill="none">
+                    <circle r="10" opacity="0.18" />
+                    <circle r="6" opacity="0.28" />
+                    <circle r="2.5" opacity="0.45" />
+                </g>
+                <!-- Sweeping beam: a rotated gradient sector animated -->
+                <defs>
+                    <linearGradient id="beamGrad" x1="0" x2="1">
+                        <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.45" />
+                        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02" />
+                    </linearGradient>
+                    <mask id="beamMask">
+                        <!-- full circle black -->
+                        <rect width="64" height="64" fill="white" />
+                        <!-- clear shield center so beam shows only inside shield -->
+                        <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="black" />
+                    </mask>
+                </defs>
+                <!-- beam (a wide triangle) placed over center -->
+                <g transform="translate(0,0)" mask="url(#beamMask)">
+                    <g transform="translate(32,30)">
+                        <path d="M0 0 L28 -12 A28 28 0 0 1 28 12 Z" fill="url(#beamGrad)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s"
+                                repeatCount="indefinite" />
+                        </path>
+                    </g>
+                </g>
+                <!-- sweep hand (thin) with pulse at tip -->
+                <g transform="translate(32,30)">
+                    <line x1="0" y1="0" x2="26" y2="-11" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round"
+                        opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s"
+                            repeatCount="indefinite" />
+                    </line>
+                    <circle cx="26" cy="-11" r="2.5" fill="#38bdf8">
+                        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s"
+                            repeatCount="indefinite" />
+                        <animate attributeName="r" values="1.6;2.8;1.6" dur="3.2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.6;0.9" dur="3.2s" repeatCount="indefinite" />
+                    </circle>
+                </g>
+            </svg>
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content-area w-full">
+        <header class="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-slate-700">
+            <div>
+                <h1 class="text-3xl font-bold">LFI Tester</h1>
+                <p class="text-slate-400 mt-1">Test for Local File Inclusion vulnerabilities with automated payload
+                    testing.</p>
+            </div>
+            <a href="/dashboard"
+                class="btn bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-xl transition-colors">Back
+                to Dashboard</a>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Input and Controls -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <div class="card">
+                    <div>
+                        <label for="urlInput" class="block text-lg font-medium text-slate-300 mb-2">Target URL</label>
+                        <input type="url" id="urlInput" placeholder="http://example.com/page.php?file="
+                            class="form-input">
+                        <p class="text-xs text-slate-500 mt-2">Include the parameter to test (e.g., `?file=`).</p>
+                    </div>
+                    <div class="mt-4">
+                        <label for="targetSelect" class="block text-sm font-medium text-slate-400 mb-2">Load Saved
+                            Target</label>
+                        <select id="targetSelect" class="select">
+                            <option value="">-- Select a saved target --</option>
+                        </select>
+                    </div>
+                    <div class="mt-6 flex gap-4">
+                        <button id="scanBtn" class="btn btn-primary w-full text-base">
+                            <svg id="scanner-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span id="scanBtnText">Test LFI</span>
+                            <svg id="scanner-spinner" class="animate-spin h-5 w-5 text-white hidden"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                        </button>
+                        <button id="saveTargetBtn" class="btn btn-secondary" title="Save current target">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="cancelBtn" class="btn btn-danger w-full text-base mt-4 hidden">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancel Test
+                    </button>
+                    <button id="exportBtn" class="btn btn-secondary w-full text-base mt-4 hidden">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Export Results
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-2">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <h2 class="text-2xl font-semibold text-slate-200">Test Results</h2>
+                    <div id="results-summary" class="text-sm font-medium text-slate-400"></div>
+                </div>
+                <div id="progress-container" class="w-full progress-bar-bg rounded-full h-2.5 mb-4 hidden">
+                    <div id="progress-bar" class="progress-bar-fill h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <div id="results" class="results-area">
+                    <div class="flex items-center justify-center h-full">
+                        <p class="text-slate-500">Results will be displayed here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="toast-container"></div>
+    </main>
+
+    <script>
+        // --- DOM Elements ---
+        const urlInput = document.getElementById("urlInput");
+        const targetSelect = document.getElementById("targetSelect");
+        const scanBtn = document.getElementById("scanBtn");
+        const scanBtnText = document.getElementById("scanBtnText");
+        const scannerIcon = document.getElementById("scanner-icon");
+        const spinner = document.getElementById("scanner-spinner");
+        const saveTargetBtn = document.getElementById("saveTargetBtn");
+        const exportBtn = document.getElementById("exportBtn");
+        const resultsDiv = document.getElementById("results");
+        const resultsSummary = document.getElementById("results-summary");
+        const progressContainer = document.getElementById("progress-container");
+        const progressBar = document.getElementById("progress-bar");
+        const toastContainer = document.getElementById("toast-container");
+        const cancelBtn = document.getElementById("cancelBtn");
+
+        let lastResults = [];
+        let abortController;
+
+        // --- State Management ---
+        function setScanningState(isScanning) {
+            urlInput.disabled = isScanning;
+            targetSelect.disabled = isScanning;
+            scanBtn.disabled = isScanning;
+            saveTargetBtn.disabled = isScanning;
+            scannerIcon.classList.toggle('hidden', isScanning);
+            scanBtnText.textContent = isScanning ? 'Testing...' : 'Test LFI';
+            spinner.classList.toggle('hidden', !isScanning);
+            cancelBtn.classList.toggle('hidden', !isScanning);
+            progressContainer.classList.toggle('hidden', !isScanning);
+            if (isScanning) {
+                progressBar.style.width = '0%';
+                resultsSummary.textContent = '';
+                exportBtn.classList.add('hidden');
+            }
+        }
+
+        // --- UI Helpers ---
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe ? unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : '';
+        }
+
+        // --- Local Storage (Targets) ---
+        function loadTargetsToSelect() {
+            const targets = JSON.parse(localStorage.getItem("deltaAppTargets")) || [];
+            targetSelect.innerHTML = `<option value="">-- Select a saved target --</option>`;
+            targets.forEach(target => {
+                const option = document.createElement("option");
+                option.value = target;
+                option.textContent = target;
+                targetSelect.appendChild(option);
+            });
+        }
+
+        saveTargetBtn.addEventListener("click", () => {
+            const urlToSave = urlInput.value.trim();
+            if (!urlToSave) {
+                showToast("Error: URL input is empty.");
+                return;
+            }
+            let targets = JSON.parse(localStorage.getItem("deltaAppTargets")) || [];
+            if (!targets.includes(urlToSave)) {
+                targets.unshift(urlToSave);
+                localStorage.setItem("lfiTargets", JSON.stringify(targets.slice(0, 50)));
+                loadTargetsToSelect();
+                showToast("Target saved successfully!");
+            } else {
+                showToast("This target is already saved.");
+            }
+        });
+
+        targetSelect.addEventListener("change", (e) => {
+            if (e.target.value) urlInput.value = e.target.value;
+        });
+
+        // --- Testing Logic ---
+        cancelBtn.addEventListener("click", () => {
+            if (abortController) {
+                abortController.abort();
+                resultsDiv.innerHTML += `<div class="p-4 bg-yellow-900/50 text-yellow-300 rounded-lg border border-yellow-700 font-bold text-center mt-2">Test cancelled by user.</div>`;
+                setScanningState(false);
+            }
+        });
+
+        scanBtn.addEventListener("click", async () => {
+            const targetUrl = urlInput.value.trim();
+            if (!targetUrl) {
+                resultsDiv.innerHTML = `<div class="p-4 bg-red-900/50 text-red-300 rounded-lg border border-red-700 font-bold text-center">Please enter a target URL.</div>`;
+                return;
+            }
+            if (!targetUrl.includes('=')) {
+                resultsDiv.innerHTML = `<div class="p-4 bg-red-900/50 text-red-300 rounded-lg border border-red-700 font-bold text-center">Target URL must include a parameter like '?file='.</div>`;
+                return;
+            }
+
+            setScanningState(true);
+            resultsDiv.innerHTML = '';
+
+            let vulnerableCount = 0, safeCount = 0;
+            abortController = new AbortController();
+
+            try {
+                const res = await fetch("/api/lfi/lfi-test", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: targetUrl }),
+                    signal: abortController.signal
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({ error: `HTTP error! Status: ${res.status}` }));
+                    throw new Error(errData.error || `HTTP error! Status: ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                if (!Array.isArray(data.results) || data.results.length === 0) {
+                    throw new Error("The backend returned no results.");
+                }
+
+                const totalResults = data.results.length;
+                lastResults = data.results;
+                resultsDiv.innerHTML = ''; // Clear initial message
+
+                data.results.forEach((result, index) => {
+                    let isVulnerable = result.vulnerable === true;
+
+                    if (isVulnerable) vulnerableCount++;
+                    else safeCount++;
+
+                    appendResult(result, isVulnerable);
+                    progressBar.style.width = `${((index + 1) / totalResults) * 100}%`;
+
+                    let summaryParts = [];
+                    if (vulnerableCount > 0) summaryParts.push(`<span class="text-red-400 font-semibold">Vulnerable: ${vulnerableCount}</span>`);
+                    if (safeCount > 0) summaryParts.push(`<span class="text-green-400 font-semibold">Safe: ${safeCount}</span>`);
+                    resultsSummary.innerHTML = summaryParts.join(' | ');
+                });
+
+                exportBtn.classList.remove('hidden');
+
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    // Already handled in cancel button
+                } else {
+                    console.error(err);
+                    resultsDiv.innerHTML = `<div class="p-4 bg-red-900/50 text-red-300 rounded-lg border border-red-700 font-bold text-center">Error: ${escapeHtml(err.message || "Backend not reachable.")}</div>`;
+                }
+            } finally {
+                setScanningState(false);
+            }
+        });
+
+        function appendResult(result, isVulnerable) {
+            const div = document.createElement("div");
+            let statusClass, statusText, statusColor;
+
+            if (isVulnerable) {
+                statusClass = 'bg-red-900/30 border-red-800';
+                statusText = '🔴 VULNERABLE';
+                statusColor = 'text-red-400';
+            } else {
+                statusClass = 'bg-green-900/30 border-green-800';
+                statusText = '🟢 SAFE';
+                statusColor = 'text-green-400';
+            }
+
+            div.className = `p-3 rounded-lg border mt-2 animate-fade-in ${statusClass}`;
+
+            div.innerHTML = `
+            <div class="flex justify-between items-center">
+                <p class="font-medium"><b>Payload:</b> <code class="bg-slate-700/50 text-slate-300 px-1.5 py-0.5 rounded">${escapeHtml(result.payload)}</code></p>
+                <p class="font-bold text-sm ${statusColor}">${statusText}</p>
+            </div>
+            <p class="break-all text-xs text-slate-400 mt-2 font-mono"><b>Expected:</b> ${escapeHtml(result.expected)} | <b>Status Code:</b> ${result.status_code}</p>
+            <p class="break-all text-xs text-slate-400 mt-1 font-mono"><b>URL Tested:</b> ${escapeHtml(result.url)}</p>
+        `;
+            resultsDiv.appendChild(div);
+        }
+
+        // --- Export Results ---
+        exportBtn.addEventListener("click", () => {
+            if (!lastResults.length) return;
+
+            let txt = "Delta LFI Test Results\n========================\n\n";
+            lastResults.forEach(r => {
+                txt += `[${r.vulnerable ? 'VULNERABLE' : 'SAFE'}] Payload: ${r.payload} | Expected: ${r.expected} | Status: ${r.status_code} | URL: ${r.url}\n`;
+            });
+
+            const blob = new Blob([txt], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "lfi_test_results.txt";
+            link.click();
+
+            showToast("Results exported successfully!");
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTargetsToSelect();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LINA Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0a0f1e, #111827, #1e293b);
+      background-size: 300% 300%;
+      animation: gradientShift 15s ease infinite;
+      overflow: hidden;
+    }
+
+    .background-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239CA3AF' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: gradientShift 15s ease infinite;
+        z-index: -1;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .login-container {
+      width: 400px;
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.125);
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      animation: fadeIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: 10;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
+    }
+    
+    .shake {
+        animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(25px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .logo-container h1 {
+      font-size: 2.2rem;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .login-container p {
+      font-size: 1rem;
+      margin-bottom: 30px;
+      color: #cbd5e1;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+      text-align: left;
+      position: relative;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      outline: none;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      transition: all 0.3s;
+    }
+    
+    .form-group input:focus {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 42px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #94a3b8;
+        transition: color 0.2s;
+    }
+    .password-toggle:hover {
+        color: #e2e8f0;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .login-btn:hover {
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: none;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      text-align: center;
+    }
+
+    .footer-text {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-pattern"></div>
+  <div class="login-container" id="login-container">
+    <div class="logo-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40" aria-label="Radar scanner shield">
+          <!-- Shield background -->
+          <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z"
+                fill="#071433"/>
+          <!-- shield glow outline -->
+          <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z"
+                fill="none" stroke="#0ea5e9" stroke-width="1.8" stroke-linejoin="round" opacity="0.95"/>
+          <!-- Radar rings -->
+          <g transform="translate(32,30)" stroke="#60a5fa" stroke-width="1.2" fill="none">
+            <circle r="10" opacity="0.18"/>
+            <circle r="6" opacity="0.28"/>
+            <circle r="2.5" opacity="0.45"/>
+          </g>
+          <!-- Sweeping beam: a rotated gradient sector animated -->
+          <defs>
+            <linearGradient id="beamGrad" x1="0" x2="1">
+              <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.45" />
+              <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02" />
+            </linearGradient>
+            <mask id="beamMask">
+              <!-- full circle black -->
+              <rect width="64" height="64" fill="white"/>
+              <!-- clear shield center so beam shows only inside shield -->
+              <path d="M32 5 L13 13 v15 c0 13 11 23 19 27 8-4 19-14 19-27V13L32 5z" fill="black"/>
+            </mask>
+          </defs>
+          <!-- beam (a wide triangle) placed over center -->
+          <g transform="translate(0,0)" mask="url(#beamMask)">
+            <g transform="translate(32,30)">
+              <path d="M0 0 L28 -12 A28 28 0 0 1 28 12 Z" fill="url(#beamGrad)" opacity="0.9">
+                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s" repeatCount="indefinite"/>
+              </path>
+            </g>
+          </g>
+          <!-- sweep hand (thin) with pulse at tip -->
+          <g transform="translate(32,30)">
+            <line x1="0" y1="0" x2="26" y2="-11" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round" opacity="0.9">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s" repeatCount="indefinite"/>
+            </line>
+            <circle cx="26" cy="-11" r="2.5" fill="#38bdf8">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3.2s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="1.6;2.8;1.6" dur="3.2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.9;0.6;0.9" dur="3.2s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        </svg>
+        <h1>LINA</h1>
+    </div>
+    <p>Welcome to the LINA Security Portal</p>
+    <form id="loginForm" method="POST" action="/login">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" placeholder="Enter your username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" placeholder="Enter your password" required>
+        <button type="button" class="password-toggle" id="togglePassword">
+            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+      </div>
+      <button type="submit" class="login-btn" id="login-btn">
+        <span id="btn-text">Login</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+      {% if error %}
+      <div class="error-message">{{ error }}</div>
+      {% endif %}
+    </form>
+    <div class="footer-text">© 2025 Team LINA. All rights reserved.</div>
+  </div>
+
+  <script>
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+    const eyeIcon = document.getElementById("eye-icon");
+
+    // Password visibility toggle logic
+    togglePassword.addEventListener("click", function() {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        
+        if (type === "password") {
+            eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        } else {
+            eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+        }
+    });
+  </script>
+</body>
+</html>
